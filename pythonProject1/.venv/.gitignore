@@ -14,7 +14,8 @@ ENV/
 *.env
 main_logic/.env
 
-*.db
+main_logic/*.db
+tests/*.db
 *.sqlite3
 
 *.log
