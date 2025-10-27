@@ -1,8 +1,9 @@
 import json
 import sqlite3
+import os
 from datetime import datetime, timedelta
 
-DB_PATH = "cache.db"
+DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "cache.db"))
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)

@@ -12,8 +12,8 @@ def test_extract_menu_with_llm_parses_valid_json(monkeypatch):
     fake_response = """```json
     {
         "restaurant_name": "Bistro Republika",
-        "date": "2025-10-26",
-        "day_of_week": "Sunday",
+        "date": "2025-10-27",
+        "day_of_week": "Monday",
         "menu_items": [],
         "daily_menu": true,
         "source_url": "https://www.bistrorepublika.cz/menu"
@@ -28,6 +28,6 @@ def test_extract_menu_with_llm_parses_valid_json(monkeypatch):
 
     monkeypatch.setattr("main_logic.llm_parser.client.responses.create", fake_create)
 
-    result = extract_menu_with_llm("<html></html>", "https://www.bistrorepublika.cz/menu", "2025-10-26")
+    result = extract_menu_with_llm("<html></html>", "https://www.bistrorepublika.cz/menu", "2025-10-27")
     assert result["restaurant_name"] == "Bistro Republika"
     assert result["daily_menu"] is True

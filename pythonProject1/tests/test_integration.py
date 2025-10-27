@@ -6,11 +6,13 @@ def test_integration_flow(monkeypatch):
     """Integration test for /summarize endpoint."""
 
     client = app.test_client()
+    call_count = {"llm": 0}
 
     def fake_scraper(url):
         return "<html><body>Menu content</body></html>"
 
     def fake_llm_parser(html, url, date):
+        call_count["llm"] += 1
         return {
             "restaurant_name": "Zlatá Hvězda",
             "date": date,
