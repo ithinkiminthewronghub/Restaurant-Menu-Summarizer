@@ -10,6 +10,17 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
+def normalize_price(price_str):
+    """Convert price string like '145,-', '145 Kč', or '145kc' into int (145)."""
+    if isinstance(price_str, (int, float)):
+        return int(price_str)
+    if not isinstance(price_str, str):
+        return None
+
+    match = re.search(r"(\d+)", price_str.replace(",", "."))
+    return int(match.group(1)) if match else None
+
+
 def extract_menu_with_llm(text: str, source_url: str, date_str: str):
     """Extracts a structured menu from restaurant webpage text using the LLM."""
 
@@ -32,7 +43,7 @@ def extract_menu_with_llm(text: str, source_url: str, date_str: str):
         {{
           "category": string,
           "name": string,
-          "price": integer,
+          "price": integer | string,
           "allergens": [string],
           "weight": string | null
         }}
@@ -49,14 +60,20 @@ def extract_menu_with_llm(text: str, source_url: str, date_str: str):
         )
 
         raw_text = resp.output_text.strip()
-
         cleaned = re.sub(r"^```json\s*|\s*```$", "", raw_text, flags=re.MULTILINE).strip()
-
         data = json.loads(cleaned)
 
+        # Normalize prices here ---
+        if "menu_items" in data and isinstance(data["menu_items"], list):
+            for item in data["menu_items"]:
+                if "price" in item:
+                    item["price"] = normalize_price(item["price"])
+
+        # Ensure defaults
         data.setdefault("source_url", source_url)
         data.setdefault("date", date_str)
 
+        # Sort so restaurant_name is always first
         if isinstance(data, dict) and "restaurant_name" in data:
             data = OrderedDict(
                 [("restaurant_name", data["restaurant_name"])]

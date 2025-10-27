@@ -1,9 +1,9 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from main_logic.llm_parser import extract_menu_with_llm, normalize_price
 
-from main_logic.llm_parser import extract_menu_with_llm
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def test_extract_menu_with_llm_parses_valid_json(monkeypatch):
@@ -31,3 +31,12 @@ def test_extract_menu_with_llm_parses_valid_json(monkeypatch):
     result = extract_menu_with_llm("<html></html>", "https://www.bistrorepublika.cz/menu", "2025-10-27")
     assert result["restaurant_name"] == "Bistro Republika"
     assert result["daily_menu"] is True
+
+
+def test_normalize_price_variants():
+
+    assert normalize_price("145 Kč") == 145
+    assert normalize_price("145,-") == 145
+    assert normalize_price("145kc") == 145
+    assert normalize_price(145) == 145
+    assert normalize_price("not available") is None

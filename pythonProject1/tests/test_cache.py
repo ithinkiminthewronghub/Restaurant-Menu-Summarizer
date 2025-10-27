@@ -5,6 +5,7 @@ from main_logic import cache
 from main_logic.cache import save_menu_to_cache, get_cached_menu, init_db
 from main_logic.app import app
 
+
 @pytest.fixture
 def temp_cache_db():
     tmp_db = tempfile.NamedTemporaryFile(delete=False)
@@ -13,6 +14,7 @@ def temp_cache_db():
     yield tmp_db.name
     tmp_db.close()
     os.unlink(tmp_db.name)
+
 
 def test_cache_write_and_read(temp_cache_db):
     url = "https://test.example.com"
@@ -23,6 +25,7 @@ def test_cache_write_and_read(temp_cache_db):
     cached = get_cached_menu(url, date)
 
     assert cached["restaurant_name"] == "Mock Café"
+
 
 def test_cache_prevents_duplicate_llm_calls(monkeypatch, temp_cache_db):
     client = app.test_client()
