@@ -1,21 +1,20 @@
 from main_logic.app import app
+import os
 
 
 def test_integration_flow(monkeypatch):
     """
     Full integration test for the /summarize API endpoint.
 
-    This test simulates a complete request to the Flask app, ensuring that:
-      - The /summarize endpoint accepts POST requests correctly.
-      - Scraping and LLM parsing functions are called as expected.
-      - The endpoint returns valid JSON data with the correct structure.
+    Ensures that authentication, scraping, and parsing work end-to-end.
     """
     client = app.test_client()
+    api_key = os.getenv("API_KEY")
 
     def fake_scraper(url):
         return "<html><body>Menu content</body></html>"
 
-    def fake_llm_parser(html, url):
+    def fake_llm_parser(html, url, date):
         return {
             "restaurant_name": "Zlatá Hvězda",
             "date": "2025-10-28",
@@ -31,6 +30,7 @@ def test_integration_flow(monkeypatch):
     response = client.post(
         "/summarize",
         json={"url": "https://www.zlata-hvezda.cz/jidelni-listek"},
+        headers={"Authorization": f"Bearer {api_key}"}
     )
 
     assert response.status_code == 200

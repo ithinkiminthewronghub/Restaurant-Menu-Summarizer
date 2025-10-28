@@ -48,6 +48,7 @@ def test_cache_prevents_duplicate_llm_calls(monkeypatch, temp_cache_db):
     """
     client = app.test_client()
     call_count = {"llm": 0}
+    api_key = os.getenv("API_KEY")
 
     def fake_scraper(url):
         return "<html>menu</html>"
@@ -57,7 +58,7 @@ def test_cache_prevents_duplicate_llm_calls(monkeypatch, temp_cache_db):
         return {
             "restaurant_name": "SPOJKA",
             "date": date,
-            "day_of_week": "Monday",
+            "day_of_week": "Tuesday",
             "menu_items": [],
             "daily_menu": True,
             "source_url": url,
@@ -69,12 +70,20 @@ def test_cache_prevents_duplicate_llm_calls(monkeypatch, temp_cache_db):
     url = "https://www.spojka-karlin.cz/menu"
 
     # First call triggers LLM
-    resp1 = client.post("/summarize", json={"url": url})
+    resp1 = client.post(
+        "/summarize",
+        json={"url": url},
+        headers={"Authorization": f"Bearer {api_key}"}
+    )
     assert resp1.status_code == 200
     assert call_count["llm"] == 1
 
     # Second call uses cache, so no new LLM call
-    resp2 = client.post("/summarize", json={"url": url})
+    resp2 = client.post(
+        "/summarize",
+        json={"url": url},
+        headers={"Authorization": f"Bearer {api_key}"}
+    )
     assert resp2.status_code == 200
     assert call_count["llm"] == 1
 
