@@ -1,4 +1,3 @@
-
 import sys
 import os
 from main_logic.llm_parser import extract_menu_with_llm, normalize_price
@@ -7,7 +6,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def test_extract_menu_with_llm_parses_valid_json(monkeypatch):
-    """Test that markdown JSON from LLM is parsed correctly."""
+    """
+    Unit test for extract_menu_with_llm — verifies that the function can
+    correctly parse valid JSON even when the LLM returns it wrapped in markdown fences.
+    """
 
     fake_response = """```json
     {

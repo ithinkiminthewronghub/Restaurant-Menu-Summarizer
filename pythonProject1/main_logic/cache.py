@@ -3,12 +3,15 @@ import sqlite3
 import os
 from datetime import datetime, timedelta
 
-
+# Default path for the SQLite cache database
 DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "cache.db"))
 
 
 def init_db(db_path: str = None):
-    """Initialize the cache database and table."""
+    """
+    Initialize the cache database and table.
+    Args: db_path (str, optional): Custom database file path.
+    """
     path = db_path or DB_PATH
     conn = sqlite3.connect(path)
     c = conn.cursor()
@@ -26,7 +29,19 @@ def init_db(db_path: str = None):
 
 
 def get_cached_menu(url: str, date: str, max_age_hours: int = 6, db_path: str = None):
-    """Return cached menu if it exists and is not expired."""
+    """
+    Retrieve a cached menu entry if it exists and is not expired.
+
+    Args:
+    url (str): The restaurant webpage URL.
+    date (str): The date string for which to retrieve the cache.
+    max_age_hours (int, optional): Maximum allowed cache age in hours. Defaults to 6.
+    db_path (str, optional): Custom path to the cache database.
+
+    Returns:
+    dict | None: Cached menu data as a dictionary if found and not expired,
+    otherwise None.
+    """
     path = db_path or DB_PATH
     conn = sqlite3.connect(path)
     c = conn.cursor()
@@ -46,7 +61,18 @@ def get_cached_menu(url: str, date: str, max_age_hours: int = 6, db_path: str = 
 
 
 def save_menu_to_cache(url: str, date: str, data: dict, db_path: str = None):
-    """Save menu to cache, replacing any existing entry for the same URL and date."""
+    """
+    Save or update a restaurant menu in the cache.
+
+    If a record already exists for the same URL and date, it is replaced.
+    The creation timestamp is stored in UTC to support cleanup and expiration.
+
+    Args:
+    url (str): The restaurant webpage URL.
+    date (str): The date string for the cached menu.
+    data (dict): The menu data to cache.
+    db_path (str, optional): Custom path to the cache database.
+    """
     path = db_path or DB_PATH
     conn = sqlite3.connect(path)
     c = conn.cursor()
@@ -58,17 +84,26 @@ def save_menu_to_cache(url: str, date: str, data: dict, db_path: str = None):
     conn.close()
 
 
-def cleanup_old_cache(days: int = 7, db_path: str = None):
-    """Delete cache entries older than given days."""
+def cleanup_old_cache(hours: int = 12, db_path: str = None):
+    """
+    Delete old cache entries older than the specified number of hours.
+
+    This function helps keep the cache small and relevant by periodically
+    removing outdated entries.
+
+    Args:
+    hours (int, optional): Maximum time (in hours) before cache entries are deleted. Defaults to 12.
+    db_path (str, optional): Custom path to the cache database.
+    """
     path = db_path or DB_PATH
-    cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
+    cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
     conn = sqlite3.connect(path)
     c = conn.cursor()
     c.execute("DELETE FROM cache WHERE created_at < ?", (cutoff,))
     deleted = c.rowcount
     conn.commit()
     conn.close()
-    print(f"Cache cleanup: removed {deleted} old entries.")
+    print(f"Cache cleanup: removed {deleted} old entries (older than {hours} hours).")
 
 
 init_db()

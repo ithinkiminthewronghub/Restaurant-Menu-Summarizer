@@ -1,22 +1,25 @@
-import json
 from main_logic.app import app
 
 
 def test_integration_flow(monkeypatch):
-    """Integration test for /summarize endpoint."""
+    """
+    Full integration test for the /summarize API endpoint.
 
+    This test simulates a complete request to the Flask app, ensuring that:
+      - The /summarize endpoint accepts POST requests correctly.
+      - Scraping and LLM parsing functions are called as expected.
+      - The endpoint returns valid JSON data with the correct structure.
+    """
     client = app.test_client()
-    call_count = {"llm": 0}
 
     def fake_scraper(url):
         return "<html><body>Menu content</body></html>"
 
-    def fake_llm_parser(html, url, date):
-        call_count["llm"] += 1
+    def fake_llm_parser(html, url):
         return {
             "restaurant_name": "Zlatá Hvězda",
-            "date": date,
-            "day_of_week": "Sunday",
+            "date": "2025-10-28",
+            "day_of_week": "Tuesday",
             "menu_items": [],
             "daily_menu": True,
             "source_url": url,
