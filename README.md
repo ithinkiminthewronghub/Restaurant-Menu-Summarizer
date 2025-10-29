@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 ### 4) Set up environment variables
 Create .env file and add your OpenAI API key and API key (for authentication). It should look like this:
-OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_KEY=your_openai_api_key    
 API_KEY=your_api_key
 
 ### 5) Run the application
